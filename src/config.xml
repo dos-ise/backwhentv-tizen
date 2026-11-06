@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<widget xmlns:tizen="http://tizen.org/ns/widgets"
+        xmlns="http://www.w3.org/ns/widgets"
+        id="http://backwhen.stream/BackWhenTV"
+        version="1.0.0"
+        viewmodes="fullscreen">
+
+    <access origin="*" subdomains="true"/>
+
+    <tizen:application
+        id="bwhentv001.BackWhenTV"
+        package="bwhentv001"
+        required_version="5.5"/>
+
+    <content src="index.html"/>
+    <description>BackWhenTV - free 90s-style cable TV</description>
+
+    <feature name="http://tizen.org/feature/screen.size.all"/>
+    <icon src="icon.png"/>
+
+    <tizen:metadata key="http://samsung.com/tv/metadata/use.voiceguide" value="false"/>
+    <tizen:metadata key="http://samsung.com/tv/metadata/floating.navigation" value="false"/>
+
+    <name>BackWhenTV</name>
+
+    <tizen:privilege name="http://tizen.org/privilege/internet"/>
+    <tizen:privilege name="http://tizen.org/privilege/tv.inputdevice"/>
+
+    <tizen:profile name="tv-samsung"/>
+
+    <tizen:setting
+        screen-orientation="landscape"
+        context-menu="disable"
+        background-support="disable"
+        encryption="disable"
+        install-location="auto"
+        hwkey-event="enable"
+        pointing-device-support="disable"/>
+</widget>

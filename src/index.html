@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>BackWhenTV</title>
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' https: http: data: blob: 'unsafe-inline' 'unsafe-eval'; media-src https: http: blob: data:; img-src https: http: data: blob:; connect-src https: http:">
+<style>
+  :root { --yellow: #ffd21f; --orange: #ff9a1f; --panel: #0b0f4a; --bg: #1230b8; --sky: #2a5bd7; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: #000; color: #fff; overflow: hidden; font-family: "Roboto Condensed", "Arial Narrow", Arial, sans-serif; user-select: none; }
+  body { cursor: none; }
+  video { position: fixed; top: 0; left: 0; right: 0; bottom: 0; width: 100%; height: 100%; object-fit: contain; background: #000; }
+  #v2 { display: none; }
+  .layer { position: fixed; top: 0; left: 0; right: 0; bottom: 0; pointer-events: none; }
+  #banner { left: 3vw; right: 3vw; bottom: 4vh; top: auto; height: auto; background: var(--panel); border: 3px solid var(--orange); padding: 1.2vh 2vw; display: none; align-items: center; gap: 2vw; }
+  #banner.on { display: flex; }
+  #bnum { font-size: 9vh; font-weight: 900; color: var(--yellow); min-width: 3ch; }
+  #bname { font-size: 2.6vh; }
+  #btitle { font-size: 3.6vh; color: var(--yellow); font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  #bnext { font-size: 2.2vh; color: #b8c6ff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  #bclock { margin-left: auto; font-size: 3vh; color: var(--orange); }
+  #guide { background: var(--bg); display: none; flex-direction: column; padding: 3vh 3vw; gap: 1vh; pointer-events: auto; }
+  #guide.on { display: flex; }
+  #ghead { display: flex; justify-content: space-between; align-items: baseline; font-size: 3.4vh; font-weight: 900; color: var(--yellow); }
+  #ghead span:last-child { color: var(--orange); }
+  #rows { display: flex; flex-direction: column; gap: .8vh; flex: 1; overflow: hidden; }
+  .row { display: grid; grid-template-columns: 9vw 24vw 1fr; background: #2742d6; border-left: 6px solid transparent; font-size: 2.8vh; align-items: center; min-height: 7.6vh; cursor: pointer; }
+  .row.sel { background: var(--yellow); color: #111; border-left-color: var(--orange); }
+  .row b { padding-left: 1vw; font-size: 3.6vh; }
+  .row .n { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; padding-right: 1vw; font-weight: 700; }
+  .row .t { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; padding-right: 1vw; }
+  .row .t i { font-style: normal; opacity: .75; margin-left: 1.2vw; }
+  #ghelp { text-align: center; color: var(--orange); font-size: 2.2vh; font-weight: 700; letter-spacing: .04em; }
+  #digits { right: 4vw; top: 4vh; left: auto; bottom: auto; width: auto; height: auto; font-size: 11vh; font-weight: 900; color: var(--yellow); text-shadow: 4px 4px 0 #000; display: none; }
+  #msg { display: none; align-items: center; justify-content: center; font-size: 7vh; font-weight: 900; text-shadow: 4px 4px 0 #000; text-align: center; }
+  #bars { display: none; background: linear-gradient(90deg, #c0c0c0 0 14.28%, #c0c000 0 28.56%, #00c0c0 0 42.84%, #00c000 0 57.12%, #c000c0 0 71.4%, #c00000 0 85.68%, #0000c0 0); align-items: center; justify-content: center; font-size: 7vh; font-weight: 900; }
+  #bars span { background: #000; padding: 2vh 4vw; border: 4px solid var(--orange); }
+  /* weather channel */
+  #wx { background: linear-gradient(180deg, #1b3fa8 0%, #0a1c6b 100%); display: none; flex-direction: column; padding: 4vh 5vw; font-weight: 700; text-shadow: 3px 3px 0 #000; }
+  #wx.on { display: flex; }
+  #wxhead { display: flex; justify-content: space-between; font-size: 4vh; color: var(--yellow); border-bottom: 4px solid var(--orange); padding-bottom: 1vh; }
+  #wxbody { flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 1.6vh; font-size: 4.2vh; overflow: hidden; }
+  #wxbody .big { font-size: 15vh; color: var(--yellow); line-height: 1; }
+  #wxbody .row2 { display: flex; justify-content: space-between; gap: 2vw; }
+  #wxbody .row2 span:first-child { color: var(--yellow); min-width: 22vw; }
+  #wxbody .sm { font-size: 3.2vh; color: #dbe4ff; font-weight: 400; line-height: 1.25; }
+  #wxbody img { max-height: 62vh; max-width: 100%; align-self: center; border: 4px solid var(--orange); background: #000; }
+  #wxfoot { display: flex; justify-content: space-between; font-size: 2.6vh; color: var(--orange); }
+  #swapinfo { display: none; }
+</style>
+</head>
+<body>
+<video id="v" playsinline></video>
+<video id="v2" playsinline></video>
+<div class="layer" id="wx"><div id="wxhead"><span id="wxtitle">LOCAL FORECAST</span><span id="wxclock"></span></div><div id="wxbody"></div><div id="wxfoot"><span id="wxpage"></span><span>BACKWHENTV WEATHER</span></div></div>
+<div class="layer" id="bars"><span>LOADING CHANNEL...</span></div>
+<div class="layer" id="msg"></div>
+<div class="layer" id="banner"><div id="bnum"></div><div><div id="bname"></div></div><div style="flex:1;min-width:0"><div id="btitle"></div><div id="bnext"></div></div><div id="bclock"></div></div>
+<div class="layer" id="guide"><div id="ghead"><span>BACKWHENTV GUIDE</span><span id="gclock"></span></div><div id="rows"></div><div id="ghelp">UP/DOWN CHANNEL &nbsp; LEFT/RIGHT PAGE &nbsp; 0-9 GO TO &nbsp; OK WATCH &nbsp; BACK CLOSE</div></div>
+<div class="layer" id="digits"></div>
+
+<script src="vendor/hls.min.js"></script>
+<script src="remote.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
