@@ -22,3 +22,7 @@ With Docker (`./build.ps1` or `./build.sh`) -> `dist/BackWhenTV.wgt`.
 Browser test: `python -m http.server --directory src`.
 
 Source is in `src/` (`app.js` adapted from the Windows app, `remote.js` holds the Tizen key codes). Pluto channels need an Android user agent in the Windows app, which Tizen cannot set, so they may not play on every TV.
+
+### Compatibility
+
+Targets Tizen 4.0 and newer (2018+ Samsung TVs). The JavaScript in `src/` is kept to ES2017 (Chromium 56 level, Tizen 4.0's engine) and the bundled `vendor/hls.min.js` is hls.js 0.14.x, which runs on that engine. Keep these constraints in mind when editing: no optional catch binding (`catch {`), no `String.padStart`, no optional chaining/nullish coalescing, no object spread. `config.xml` sets `required_version="4.0"`.

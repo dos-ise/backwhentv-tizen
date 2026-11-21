@@ -10,7 +10,7 @@
     <tizen:application
         id="bwhentv001.BackWhenTV"
         package="bwhentv001"
-        required_version="5.5"/>
+        required_version="4.0"/>
 
     <content src="index.html"/>
     <description>BackWhenTV - free 90s-style cable TV</description>

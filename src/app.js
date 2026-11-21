@@ -9,7 +9,8 @@ let tuned = 0, sel = 0, mode = "tv", tuneGen = 0, started = false, hls = null, w
 const totals = {};
 const bad = new Set();
 
-const clock = (ms) => { const d = new Date(ms); let h = d.getHours(); const m = d.getMinutes(); const ap = h >= 12 ? "P" : "A"; h = h % 12 || 12; return h + ":" + String(m).padStart(2, "0") + ap; };
+const pad2 = (s) => { s = String(s); return s.length < 2 ? "0" + s : s; };
+const clock = (ms) => { const d = new Date(ms); let h = d.getHours(); const m = d.getMinutes(); const ap = h >= 12 ? "P" : "A"; h = h % 12 || 12; return h + ":" + pad2(m) + ap; };
 const jget = (path) => fetch(BASE + path, { cache: "no-store" }).then((r) => { if (!r.ok) throw new Error(path + " " + r.status); return r.json(); });
 
 /* ---------- schedules (Internet Archive channels loop on a wall clock) ---------- */
@@ -82,7 +83,7 @@ const loadingOn = (on) => { $("#bars").style.display = on ? "flex" : "none"; };
 function stopAll() {
   clearTimeout(podTimer);
   endSwap("tune", true);
-  if (hls) { try { hls.destroy(); } catch { /* gone */ } hls = null; }
+  if (hls) { try { hls.destroy(); } catch (e) { /* gone */ } hls = null; }
   clearInterval(wxTimer); wxTimer = null;
   $("#wx").classList.remove("on");
   v.onloadedmetadata = v.onplaying = v.onended = v.onerror = null;
@@ -155,7 +156,7 @@ async function playPluto(ch, gen, retried) {
     hls.loadSource(url);
     hls.attachMedia(v);
     v.play().catch(() => {});
-  } catch {
+  } catch (e) {
     if (gen !== tuneGen) return;
     loadingOn(false); showMsg("NO SIGNAL");
   }
@@ -225,7 +226,7 @@ async function playWeather(ch, gen) {
   $("#wxbody").textContent = "";
   playSlot({ id: "ia-retro-weather", kind: "ia" }, gen, 0); // the music
   loadingOn(false);
-  try { [wxData, wxExtra] = await Promise.all([jget("/api/weather"), jget("/api/weather/extra").catch(() => null)]); } catch { /* keep going without */ }
+  try { [wxData, wxExtra] = await Promise.all([jget("/api/weather"), jget("/api/weather/extra").catch(() => null)]); } catch (e) { /* keep going without */ }
   wxPage = 0;
   drawWx();
   wxTimer = setInterval(() => { wxPage++; drawWx(); }, 11000);
@@ -265,7 +266,7 @@ async function loadClips() {
     const m = await jget("/clips/manifest.json");
     allClips = m.clips.map((c) => ({ id: c.id, type: c.type, dur: c.dur, url: BASE + "/clips/" + c.file }));
     allClips.forEach((c) => fetch(c.url).catch(() => {})); // warm the cache so a swap starts instantly
-  } catch { allClips = []; }
+  } catch (e) { allClips = []; }
 }
 function plan(seconds, used) {
   const cands = [];
@@ -337,7 +338,7 @@ function endSwap(why, quiet) {
   swapCooldown = performance.now() + 20000;
   v.muted = muted;
   if (!quiet && hls) {
-    try { hls.startLoad(-1); } catch { /* ignore */ }
+    try { hls.startLoad(-1); } catch (e) { /* ignore */ }
     if (hls.liveSyncPosition) v.currentTime = hls.liveSyncPosition; // back to Pluto's live edge
     v.play().catch(() => {});
   }
@@ -347,7 +348,7 @@ function endSwap(why, quiet) {
 /* ---------- anonymous usage: random id, version, minutes per channel ---------- */
 const usage = (() => {
   let id = localStorage.getItem("bw-id");
-  if (!id) { id = [...crypto.getRandomValues(new Uint8Array(12))].map((b) => b.toString(16).padStart(2, "0")).join(""); localStorage.setItem("bw-id", id); }
+  if (!id) { id = [...crypto.getRandomValues(new Uint8Array(12))].map((b) => pad2(b.toString(16))).join(""); localStorage.setItem("bw-id", id); }
   const watched = {};
   let cur = null, since = 0;
   const flushCur = () => { if (cur && started) { const m = Math.round((Date.now() - since) / 60000); if (m > 0) { watched[cur] = (watched[cur] || 0) + m; since += m * 60000; } } };
