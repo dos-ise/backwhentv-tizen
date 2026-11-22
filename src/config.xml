@@ -2,7 +2,7 @@
 <widget xmlns:tizen="http://tizen.org/ns/widgets"
         xmlns="http://www.w3.org/ns/widgets"
         id="http://backwhen.stream/BackWhenTV"
-        version="1.0.0"
+        version="1.1.0"
         viewmodes="fullscreen">
 
     <access origin="*" subdomains="true"/>
